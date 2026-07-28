@@ -89,3 +89,46 @@ public:
     }
 };
 ```
+# 160.相交链表【双指针法】
+![NO1](./img/160_1.png)
+![NO1](./img/160_2.png)
+```cpp
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+ /*思路是
+•LA=a+c
+•LB=b+c
+目标：找到相交点 C。
+方法：创建两个指针 pA 和 pB，分别从链表 A 和链表 B 的头节点开始遍历。
+1.第一轮遍历：
+pA 走完链表 A 后（走到 null），将其重新指向链表 B 的头节点。
+pB 走完链表 B 后（走到 null），将其重新指向链表 A 的头节点。
+2.第二轮遍历：
+￮在它们重新指向后，让它们继续向前移动。
+关键洞察：当 pA 重新指向 B 链表，且 pB 重新指向 A 链表时：
+•指针 pA 走过的总距离是：LA+LB=(a+c)+b
+•指针 pB 走过的总距离是：LB+LA=(b+c)+a
+由于 a+c+b=b+c+a，所以两个指针走过的总距离是相等的。*/
+class Solution {
+public:
+    ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
+        if(headA==nullptr ||headB==nullptr) return nullptr;
+        ListNode * p=headA;
+        ListNode * q=headB;
+        while(p!=q){
+            p=p==nullptr?headB:p->next;
+            q=q==nullptr?headA:q->next;
+
+        }
+        /*•如果链表相交，它们最终会在相交节点处相遇。
+          •如果链表不相交（即 c=0），它们会同时在两个链表的末尾 null 处相遇（因为 LA+LB 仍然等于 LB+LA），这时返回 null。*/
+        return p;
+    }
+};
+```
