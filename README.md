@@ -415,3 +415,180 @@ int main(){
     return 0;
 }
 ```
+# 560.和为K的子数组
+![NO1](./img/560.png)
+pre[j]=pre[i-1]+k
+
+pre[i-1]=pre[j]-k
+找以j结尾的所有符合条件的起点
+```cpp
+//计算前缀和，定义map<前缀和，该数值出现的次数> 主要是因为数组中可能会有负数，导致某个前缀和数会出现多次，如果是单调的数列，那前缀和会是唯一的，现在不是
+//去找pre-k的次数，即找以R为右区间的 起点的个数
+class Solution {
+public:
+    int subarraySum(vector<int>& nums, int k) {
+        //count[0]=1,前缀和为0至少出现一次
+        unordered_map<int,int> count;
+        count[0]=1;
+        int pre=0,ans=0;
+        for(int num:nums){
+            pre+=num;
+            if(count.find(pre-k)!=count.end()){
+                ans+=count[pre-k];
+            }
+            count[pre]++;
+        }
+        return ans;
+    }
+};
+```
+```cpp
+#include<bits/stdc++.h>
+using namespace std;
+int main(){
+    int n,k;
+    cin>>n>>k;
+    vector<int> nums(n);
+    for(int i=0;i<n;i++){
+        cin>>nums[i];
+    }
+    vector<int> pre(n+1,0);
+    for(int i=1;i<=n;i++){
+        pre[i]=pre[i-1]+nums[i-1];
+    }
+    unordered_map<int,int> mp;
+    int ans=0;
+    for(int i=0;i<=n;i++){
+        if(mp.find(pre[i]-k)!=mp.end()){
+            ans+=mp[pre[i]-k];
+        }
+        mp[pre[i]]++;
+    }
+    cout<<ans;
+    return 0;
+}
+```
+# 198.打家劫舍【DP】
+动态规划，选当前，不选当前（要求是不能连续打劫 所能偷盗的最大价值）
+```cpp
+class Solution {
+public:
+    int rob(vector<int>& nums) {
+        int prev1=0,prev2=0;
+        for(int x:nums){
+            int cur=max(prev1,prev2+x);
+            prev2=prev1;
+            prev1=cur;
+        }
+        return prev1;
+    }
+};
+```
+```cpp
+#include<bits/stdc++.h>
+using namespace std;
+int main(){
+    int n;
+    cin>>n;
+    vector<int> nums(n);
+    for(int i=0;i<n;i++){
+        cin>>nums[i];
+    }
+    int dp[100][100];
+    dp[0]=nums[0];
+    dp[1]=max(nums[0],nums[1]);
+    for(int i=2;i<n;i++){
+        dp[i]=max(dp[i-1],dp[i-2]+nums[i]);
+    }
+    cout<<dp[n-1];
+    return 0;
+}
+```
+# 994.腐烂的橘子 【BFS】
+![NO1](./img/994.png)
+腐烂是一层一层同步扩散，适合BFS
+
+q[0]存放当前这一轮需要往外传染的腐烂橘子坐标
+
+q[1]存放本轮传染中新腐烂的橘子，留给下一轮继续扩散
+
+state切换当前正在使用哪一个队列的标记
+
+state=0现在处理q[0]里的橘子
+
+state^=1 0 变 1、1 变 0，切换队列，用 state 异或只是精简写法，省去if(state==0) 的判断代码
+```cpp
+//核心bfs
+while(!q[0].empty()||!q[1].empty()){
+    ans++;
+    while(!q[state].empty()){
+        int cx=q[state].front().first,cy=q[state].front.second;
+        q[state].pop();
+        //坐标不合法 continue；
+        //当前新鲜 感染
+        if(grid[cx][cy]==1){
+            grid[cx][cy]==2;
+            q[state^1].push(make_pair(cx,cy));
+            --fresh;
+        }
+    }
+    state^=1;
+}
+```
+```cpp
+#include<bits/stdc++.h>
+using namespace std;
+int grid[100][100];
+int dir[4][2]={{1,0},{-1,0},{0,1},{0,-1}};
+int main(){
+    int m;
+    int n;
+    int fresh=0,state=0;
+    queue<pair<int,int>> q[2];
+    cin>>m>>n;
+    for(int i=0;i<m;i++){
+        for(int j=0;j<n;j++){
+            cin>>grid[i][j];
+            if(grid[i][j]==1) fresh++;
+            if(grid[i][j]==2) q[state].push(make_pair(i,j));
+        }
+    }
+    if(fresh==0){
+        cout<<0;
+        return 0;
+    }
+    int ans=0;
+    //说明还有橘子可以感染
+    while(!q[0].empty()||!q[1].empty()){
+        //进入新一轮感染
+        ans++;
+        while(!q[state].empty()){
+            int x=q[state].front().first,y=q[state].front().second;
+            q[state].pop();
+            for(int i=0;i<4;i++){
+                int curx=x+dir[i][0],cury=y+dir[i][1];
+                if(curx<0||curx>=m||cury<0||cury>=n) continue;
+                if(grid[curx][cury]==1) {
+                    //标记为腐烂，防止重复bfs
+                    grid[curx][cury]=2;
+                    //扔进另一个队列，下一轮由它进行感染
+                    q[state^1].push(make_pair(curx,cury));
+                    fresh--;
+                }
+            }
+        }
+        state^=1;
+    }
+    //循环完无法腐烂，左下角的橘子永远不会腐烂，因为腐烂只会发生在 4 个方向上。
+
+    /*
+    3 3
+    2 1 1
+    0 1 1
+    1 0 1
+    */
+    if(fresh>0) cout<<-1<<endl;
+    else cout<<ans-1;
+    return 0;
+}
+```
