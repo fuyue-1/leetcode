@@ -592,3 +592,38 @@ int main(){
     return 0;
 }
 ```
+# 3.无重复字符的最长子串【滑动窗口】
+考虑在常数级别解决
+
+l,r 初始化0
+每次移动r，更新 l , r 指向的子串的各个字符种类数量，如果没有重复就继续移动右指针（每次看右指针所指的是不是重复出现的字符就可以）
+如果出现了重复字符，移动左指针，直到重复的字符不重复
+
+每次更新最长子串长度
+字符映射到ASCII码上
+![](./img/3.png)
+```cpp
+#include<bits/stdc++.h>
+using namespace std;
+int cnt[512]={0};
+int main(){
+    string s;
+    cin>>s;
+    int ans=0;
+    int l=0,r=0;
+    cnt[s[0]]++;
+    while(r<s.length()-1){
+        r++;
+        cnt[s[r]]++;
+        if(cnt[s[r]]>1){
+            while(l<r && cnt[s[r]]>1){
+                cnt[s[l]]--;
+                l++;
+            }
+        }
+        ans=max(ans,r-l+1);
+    }
+    cout<<ans;
+    return 0;
+}
+```
