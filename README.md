@@ -301,4 +301,73 @@ int main(){
     return 0;
 }
 ```
+# 62.不同路径【DP/数学组合公式】
+![1](./img/62.png)
+（i，j）只会从（i-1, j）和（i, j-1）走到
+# 第一种思路 动态规划
+```cpp
+#include<bits/stdc++.h>
+using namespace std;
+int main(){
+    int m,n;
+    cin>>m>>n;
+    int dp[100][100];
+    for(int i=0;i<m;i++){
+        for(int j=0;j<n;j++){
+            if(i==0||j==0) dp[i][j]=1;
+            else dp[i][j]=dp[i-1][j]+dp[i][j-1];
+        }
+    }
+    cout<<dp[m-1][n-1];
+    return 0;
+}
+```
+# 第二种思路 
+机器人从左上角走到右下角：
+网格 m 行 n 列
+必须向下走 m-1 步，向右走 n-1 步
+总步数：total = (m-1)+(n-1) = m+n-2
 
+问题等价于：一共 total 步，从中选出 m-1 步向下（剩下自动向右），求组合数公式：
+$$C_{total}^{k} = \frac{total!}{k!\cdot (total-k)!}$$
+组合数递推写法：
+$$C_{t}^{k} = \prod_{i=1}^{k}\frac{t-k+i}{i}$$
+为什么可以直接先乘后除不会出现小数？
+组合数结果一定是整数，每一轮乘法之后，必然能被 i 整除，不会产生浮点数误差。
+使用long long防止中间数值溢出。
+```cpp
+class Solution {
+public:
+    int uniquePaths(int m, int n) {
+        int total=m+n-2;
+        //取小减少运算
+        int k=min(m-1,n-1);
+        long long res=1;
+        for(int i=1;i<=k;i++){
+            res=res*(total-k+i)/i;
+        }
+        return (int)res;
+    }
+};
+```
+# 第三种思路
+我们按「从上到下、每行从左向右」遍历
+
+计算 dp[j] 的时候：
+
+未修改的dp[j]保存上一行数据（来自上方）
+
+dp[j-1]在本轮循环已经更新，保存本行左侧数据；
+直接原地覆盖，不需要额外开辟二维空间，实现滚动复用
+```cpp
+int uniquePaths(int m, int n) {
+    if(m < n) swap(m,n);
+    vector<int> dp(n,1);
+    for(int i=1;i<m;i++){
+        for(int j=1;j<n;j++){
+            dp[j] += dp[j-1];
+        }
+    }
+    return dp.back();
+}
+```
