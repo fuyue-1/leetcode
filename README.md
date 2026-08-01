@@ -18,6 +18,7 @@
 - [198.打家劫舍【DP】](#198打家劫舍dp)
 - [994.腐烂的橘子 【BFS】](#994腐烂的橘子-bfs)
 - [3.无重复字符的最长子串【滑动窗口】](#3无重复字符的最长子串滑动窗口)
+- [239.滑动窗口最大值](#239滑动窗口最大值)
 # 1.两数之和【哈希表】
 给定一个整数数组 nums 和一个整数目标值 target，请你在该数组中找出 和为目标值 target  的那 两个 整数，并返回它们的数组下标。
 
@@ -645,4 +646,35 @@ int main(){
     cout<<ans;
     return 0;
 }
+```
+# 239.滑动窗口最大值
+![](./img/239.png)
+```cpp
+class Solution {
+public:
+//deque = 双端队列（double-ended queue），可以头部、尾部同时快速插入、删除元素。
+    vector<int> maxSlidingWindow(vector<int>& nums, int k) {
+        vector<int> res;
+        deque<int> dp; // 存下标，维持队列对应数值单调递减
+        int n=nums.size();
+        for(int i=0;i<n;i++){
+            // 步骤1：维护单调递减性质
+            while(!dp.empty()&&nums[i]>=nums[dp.back()]){
+                dp.pop_back();
+            }
+            dp.push_back(i);
+
+            // 步骤2：清除滑出窗口范围的下标
+            while(dp.front()<=i-k){
+                dp.pop_front();
+            }
+
+            // 步骤3：窗口形成之后，队首就是当前窗口最大值下标
+            if(i>=k-1){
+                res.push_back(nums[dp.front()]);
+            }
+        }
+        return res;
+    }
+};
 ```
