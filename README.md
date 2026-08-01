@@ -371,3 +371,47 @@ int uniquePaths(int m, int n) {
     return dp.back();
 }
 ```
+# 56.合并区间
+结构体PAIR 重载比较操作 operator <
+![](./img/56.png)
+```cpp
+//先按照左区间从大到小排序，后续只需要比较后面坐标的左区间是否在当前区间范围内，重叠就合并，不重叠就结束现有的区间合并，把当前的作为新的
+#include<bits/stdc++.h>
+using namespace std;
+int ans[100][2];
+struct PAIR{
+    int x,y;
+    bool operator<(const PAIR &a)const{
+        if(x==a.x) return y<a.y;
+        return x<a.x;
+    }
+}a[1005];
+int main(){
+    int n;
+    cin>>n;
+    for(int i=0;i<n;i++){
+        cin>>a[i].x>>a[i].y;
+    }
+    sort(a,a+n);
+    int m=0;
+    int l=a[0].x,r=a[0].y;
+    for(int i=1;i<n;i++){
+        if(a[i].x<=r){
+            r=max(a[i].y,r);
+        }else{
+            m++;
+            ans[m][0]=l;
+            ans[m][1]=r;
+            l=a[i].x;
+            r=a[i].y;
+        }
+    }
+    m++;
+    ans[m][0]=l;
+    ans[m][1]=r;
+    for(int k=1;k<=m;k++){
+        cout<<ans[k][0]<<' '<<ans[k][1]<<endl;
+    }
+    return 0;
+}
+```
