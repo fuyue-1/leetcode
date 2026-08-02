@@ -20,6 +20,8 @@
 - [994.腐烂的橘子 【BFS】](#994腐烂的橘子-bfs)
 - [3.无重复字符的最长子串【滑动窗口】](#3无重复字符的最长子串滑动窗口)
 - [239.滑动窗口最大值](#239滑动窗口最大值)
+- [55.跳跃游戏【贪心策略】](#55跳跃游戏贪心策略)
+- [78.子集【状态压缩】](#78子集状态压缩)
 # 1.两数之和【哈希表】
 给定一个整数数组 nums 和一个整数目标值 target，请你在该数组中找出 和为目标值 target  的那 两个 整数，并返回它们的数组下标。
 
@@ -729,6 +731,77 @@ int main(){
         s.erase(s.find(a[i-k]));
         s.insert(a[i]);
         cout<<*s.begin()<<" ";
+    }
+    return 0;
+}
+```
+# 55.跳跃游戏【贪心策略】
+![](./img/55.png)
+局部最优 → 推导出全局最优
+
+局部最优选择：走到下标i时，尽可能拓展最远可达距离 i + nums[i]
+```cpp
+class Solution {
+public:
+    bool canJump(vector<int>& nums) {
+        int maxr=nums[0];
+        for(int i=0;i<nums.size();i++){
+            //i这个位置根本无法到达
+            if(i>maxr) return false;
+            maxr=max(maxr,i+nums[i]);
+            //一定可以到底终点
+            if(maxr>=(nums.size()-1)) return true;
+        }
+        return maxr>=nums.size()-1;
+    }
+};
+```
+# 78.子集【状态压缩】
+![](./img/78.png)
+所有数 选 / 不选 可以对应成二进制数，0~2^n-1
+
+状态->二进制数，状态压缩（一堆bool变量->一个int数）
+```cpp
+class Solution {
+public:
+    vector<vector<int>> subsets(vector<int>& nums) {
+        vector<vector<int>> res;
+        int n=nums.size();
+       
+        for(int i=0;i<(1<<n);i++){
+            vector<int> path;
+            for(int m=0;m<n;m++){
+                if(i & (1<<m)){
+                    path.push_back(nums[m]);
+                }
+            }
+            res.push_back(path);
+        }
+        return res;
+    }
+};
+```
+```cpp
+#include<bits/stdc++.h>
+using namespace std;
+int main(){
+    int n;
+    cin>>n;
+    int a[n];
+    for(int i=0;i<n;i++){
+        cin>>a[i];
+    }
+    //外层循环 i：枚举每一种子集状态（0 ~ 2ⁿ-1）
+    for(int i=0;i<(1<<n);i++){
+        cout<<'[';
+        //内层循环 j：检查二进制每一位
+        for(int j=0;j<n;j++){
+            // 判断 i 的第 j 位是不是 1
+            if(i &(1<<j)){
+                cout<<a[j]<<" ";
+            }
+        }
+        cout<<']'<<endl;
     }
     return 0;
 }
