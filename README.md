@@ -22,6 +22,8 @@
 - [239.滑动窗口最大值](#239滑动窗口最大值)
 - [55.跳跃游戏【贪心策略】](#55跳跃游戏贪心策略)
 - [78.子集【状态压缩】](#78子集状态压缩)
+- [74.搜索二维矩阵【满足单调性--\>二分搜索】](#74搜索二维矩阵满足单调性--二分搜索)
+- [739.每日温度【单调栈】](#739每日温度单调栈)
 # 1.两数之和【哈希表】
 给定一个整数数组 nums 和一个整数目标值 target，请你在该数组中找出 和为目标值 target  的那 两个 整数，并返回它们的数组下标。
 
@@ -802,6 +804,84 @@ int main(){
             }
         }
         cout<<']'<<endl;
+    }
+    return 0;
+}
+```
+# 74.搜索二维矩阵【满足单调性-->二分搜索】
+![](./img/74.png)
+遍历穷举/二分
+先二分行，可以先看第一个元素，判断目标值在哪一行，再二分列
+二分结束条件是左区间=右区间
+```cpp
+#include<bits/stdc++.h>
+using namespace std;
+int main(){
+    int m,n,t;
+    cin>>m>>n>>t;
+    int a[m][n];
+    for(int i=0;i<m;i++){
+        for(int j=0;j<n;j++){
+            cin>>a[i][j];
+        }
+    }
+    int mid=0,l1=0,l2=0,r1=m-1,r2=n-1;
+    int row=0;
+    //先找行
+    while(l1<=r1){
+        mid=(l1+r1)/2;
+        if(a[mid][0]<=t){
+            //可能在当前行或者后面的行
+            row=max(row,mid);
+            l1=mid+1;
+        }else {
+            r1=mid-1;
+        }
+    }
+    //再找列
+    while(l2<=r2){
+        mid=(l2+r2)/2;
+        if(a[row][mid]<t){
+            l2=mid+1;
+        }else if(a[row][mid]>t){
+            r2=mid-1;
+        }else{
+            cout<<"true";
+            return 0;
+        }
+    }
+    cout<<"false";
+    return 0;
+}
+```
+# 739.每日温度【单调栈】
+示例1：
+
+输入: temperatures = [73,74,75,71,69,72,76,73]
+输出: [1,1,4,2,1,1,0,0]
+
+考虑用单调栈（栈里面存的是下标）
+```cpp
+#include<bits/stdc++.h>
+using namespace std;
+int a[100];
+int ans[100];
+int main(){
+    int n;
+    cin>>n;
+    for(int i=0;i<n;i++){
+        cin>>a[i];
+    }
+    stack<int> s;
+    for(int i=0;i<n;i++){
+        while(!s.empty() && a[s.top()]<a[i]){
+            ans[s.top()]=i-s.top();
+            s.pop();
+        }
+        s.push(i);
+    }
+    for(int j=0;j<n;j++){
+        cout<<ans[j]<<" ";
     }
     return 0;
 }
