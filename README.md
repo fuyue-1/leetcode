@@ -24,6 +24,10 @@
 - [78.子集【状态压缩】](#78子集状态压缩)
 - [74.搜索二维矩阵【满足单调性--\>二分搜索】](#74搜索二维矩阵满足单调性--二分搜索)
 - [739.每日温度【单调栈】](#739每日温度单调栈)
+- [300.最长递增子序列【动态规划】](#300最长递增子序列动态规划)
+- [22.括号生成【状态压缩 , 括号( )--\> 0 1 】](#22括号生成状态压缩--括号----0-1-)
+- [238.除自身外数组其余的乘积，不用除法【前缀和】](#238除自身外数组其余的乘积不用除法前缀和)
+    - [注意边界](#注意边界)
 # 1.两数之和【哈希表】
 给定一个整数数组 nums 和一个整数目标值 target，请你在该数组中找出 和为目标值 target  的那 两个 整数，并返回它们的数组下标。
 
@@ -882,6 +886,110 @@ int main(){
     }
     for(int j=0;j<n;j++){
         cout<<ans[j]<<" ";
+    }
+    return 0;
+}
+```
+# 300.最长递增子序列【动态规划】
+max_element(dp,dp+n) → 得到最大值所在指针
+*max_element(dp,dp+n) → 拿到最大值本身
+遍历范围：dp[0] ~ dp[n-1]
+```cpp
+#include<bits/stdc++.h>
+using namespace std;
+int main(){
+    int n;
+    cin>>n;
+    int a[n];
+    for(int i=0;i<n;i++){
+        cin>>a[i];
+    }
+    int dp[n]={1};
+    for(int i=1;i<n;i++){
+        for(int j=0;j<i;j++){
+            //当前值可以加入递增序列，即+1
+            //找以i结尾的最长目标
+            if(a[j]<a[i]) dp[i]=max(dp[i],dp[j]+1);
+        }
+    }
+    cout<<*max_element(dp,dp+n);
+    return 0;
+}
+```
+
+# 22.括号生成【状态压缩 , 括号( )--> 0 1 】
+示例 1：
+
+输入：n = 3
+输出：["((()))","(()())","(())()","()(())","()()()"]
+
+![](./img/22.png)
+```cpp
+#include<bits/stdc++.h>
+using namespace std;
+//用l来记录'（'的个数，ch来记录当前括号的平衡情况
+int main(){
+    int n;
+    cin>>n;
+
+    for(int i=0;i<(1<<2*n);i++){
+        int l=0,ch=0;
+        string s;
+        //一共生成2n个括号,下标到2n-1
+        for(int j=2*n-1;j>=0;j--){
+            //定义1是'（'，0是'）'
+            if(i&(1<<j)){
+                s.push_back('(');
+                l++;ch++;
+            }else{
+                s.push_back(')');
+                ch--;
+            }
+            if(ch<0) break;
+        }
+        if(ch<0 ||l!=n) continue;
+        cout<<s<<endl;
+    }
+    return 0;
+}
+```
+# 238.除自身外数组其余的乘积，不用除法【前缀和】
+### 注意边界
+做法：
+求解 b 数组前，先预处理 L,R
+L [i]=a [1] a [2]⋯a [i]
+R [i]=a [i] a [i+1]⋯a [n]
+于是有
+b [i]=L [i-1] * R [i+1]（注意边界 1 和 n）
+```cpp
+#include<bits/stdc++.h>
+using namespace std;
+int main(){
+    int n;
+    cin>>n;
+    int a[100];
+    int pre[100];
+    
+    //0 n-1
+    for(int i=0;i<n;i++){
+        cin>>a[i];
+    }
+    //0 
+    pre[0]=a[0];
+    //1 n-1 当前元素在内的前面的所有数值的乘积
+    for(int i=1;i<n;i++){
+        pre[i]=a[i]*pre[i-1];
+    }
+    int r[100];
+    r[n-1]=a[n-1];
+    //当前元素和之后所有元素的乘积
+    for(int j=n-2;j>=0;j--){
+        r[j]=r[j+1]*a[j];
+    }
+    for(int k = 0; k < n; k++){
+        long long L = (k == 0) ? 1 : pre[k-1];
+        long long R = (k == n-1) ? 1 : r[k+1];
+        cout << L * R << " ";
     }
     return 0;
 }
