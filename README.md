@@ -1,5 +1,6 @@
 # leetcode Hot 100
 ## 目录
+
 - [leetcode Hot 100](#leetcode-hot-100)
   - [目录](#目录)
 - [1.两数之和【哈希表】](#1两数之和哈希表)
@@ -650,9 +651,16 @@ int main(){
 # 239.滑动窗口最大值
 ![](./img/239.png)
 ```cpp
+//双端队列写法
 class Solution {
 public:
 //deque = 双端队列（double-ended queue），可以头部、尾部同时快速插入、删除元素。
+/*
+dp.front()    读取队首
+dp.pop_front() 删除队首
+dp.back()     读取队尾
+dp.pop_back() 删除队尾
+*/
     vector<int> maxSlidingWindow(vector<int>& nums, int k) {
         vector<int> res;
         deque<int> dp; // 存下标，维持队列对应数值单调递减
@@ -677,4 +685,51 @@ public:
         return res;
     }
 };
+```
+set 集合
+```cpp
+set<int> s;
+s.insert(x) 将x插入到集合当中
+s.erase(x) 将x从集合中删除
+s.find(x) 找到集合中为x的元素
+s.begin() ~ s.end() 依次指向集合中从小到大的元素
+```
+普通 set不能存重复数字，直接存数值会出错。
+这个题中 set 并不适用，因为题目中的数组可能是重复的。
+解决办法：使用 multiset（多重集合，允许重复元素），这就是滑动窗口第二种可行解法。
+```cpp
+希望相同的数可以被重复 insert，也可以重复 erase
+
+multiset<int> s; 是元素可以重复的 set
+s.insert (x) 将 x 插入到集合当中
+s.erase (x) 将所有的 x 从集合中删除
+s.find (x) 找到集合中为 x 的元素
+s.begin () ~ s.end () 依次指向集合中从小到大的元素
+每次只删除一个 x：
+先找到集合中为 x 的元素，得到其指针，然后根据指针 erase 元素。
+s.erase(s.find(x))
+```
+```cpp
+//完整multiset写法如下：
+#include<bits/stdc++.h>
+using namespace std;
+int main(){
+    int a[1000];
+    int n,k;
+    cin>>n>>k;
+    for(int i=0;i<n;i++){
+        cin>>a[i];
+    }
+    multiset<int,greater<int>> s;
+    for(int i=0;i<k;i++){
+        s.insert(a[i]);
+    }
+    cout<<*s.begin()<<" ";
+    for(int i=k;i<n;i++){
+        s.erase(s.find(a[i-k]));
+        s.insert(a[i]);
+        cout<<*s.begin()<<" ";
+    }
+    return 0;
+}
 ```
