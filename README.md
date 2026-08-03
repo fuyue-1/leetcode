@@ -30,6 +30,7 @@
     - [注意边界](#注意边界)
 - [51.N皇后【dfs】](#51n皇后dfs)
 - [76.最小覆盖子串【滑动窗口】](#76最小覆盖子串滑动窗口)
+- [41.缺失的第一个正数](#41缺失的第一个正数)
 # 1.两数之和【哈希表】
 给定一个整数数组 nums 和一个整数目标值 target，请你在该数组中找出 和为目标值 target  的那 两个 整数，并返回它们的数组下标。
 
@@ -1095,3 +1096,106 @@ int main() {
 给定两个字符串 s 和 t，长度分别是 m 和 n，返回 s 中的 最短窗口 子串，使得该子串包含 t 中的每一个字符（包括重复字符）。如果没有这样的子串，返回空字符串 ""。
 
 测试用例保证答案唯一。
+check当前串是否包含每一个字符
+```
+这个题注意数组开的要大一点，ASCII码值比较大开到150；注意s.length()先转化为int类型
+```
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+// st[]：窗口内字符计数；tt[]：目标字符串t的字符计数
+int st[150], tt[150];
+
+// check函数：判断当前窗口是否完整覆盖t
+bool check() {
+    // 大写A-Z
+    for (int i = (int)'A'; i <= (int)'Z'; ++i) {
+        // t需要该字符(tt[i]>0)，但是窗口内数量不够 → 不满足
+        if (tt[i] > 0 && st[i] < tt[i])
+            return false;
+    }
+    // 小写a-z
+    for (int i = (int)'a'; i <= (int)'z'; ++i) {
+        if (tt[i] > 0 && st[i] < tt[i])
+            return false;
+    }
+    // 所有需要的字符数量都达标
+    return true;
+}
+
+int main() {
+    string s, t;
+    cin >> s >> t;
+    int sl = s.length(), tl = t.length();
+    
+    // minl：记录最小窗口长度，初始无穷大；start：最小窗口起始下标
+    int l = 0, r = -1, minl = 1e9, start = -1;
+    
+    // 初始化计数数组全部清零
+    for (int i = 0; i < 150; ++i) {
+        tt[i] = st[i] = 0;
+    }
+    // 统计目标串t每个字符出现次数
+    for (int i = 0; i < tl; ++i) {
+        tt[t[i]]++;
+    }
+
+    // 滑动窗口主循环：右指针r不断向右扩大窗口
+    while (r < sl) {
+        // 右指针右移，把s[r]纳入窗口，计数+1
+        st[s[++r]]++;
+
+        // 关键：只要窗口满足覆盖条件，就不断尝试收缩左边界，寻找更短合法窗口
+        while (l <= r && check()) {
+            // 当前窗口长度：r-l+1
+            if (minl > r - l + 1) {
+                minl = r - l + 1;
+                start = l;  // 更新最优窗口起点
+            }
+            // 左指针右移，移出窗口左侧字符，计数-1
+            st[s[l++]]--;
+        }
+    }
+
+    // start=-1 代表没有找到合法子串
+    if (start == -1)
+        cout << "";
+    else
+        cout << s.substr(start, minl);
+    return 0;
+}
+```
+
+# 41.缺失的第一个正数
+重点是思维，如果这个数放哪都不合适（超出1-n范围）给他统一标记为0
+```cpp
+// 4
+// 3 4 -1 1
+#include<bits/stdc++.h>
+using namespace std;
+int main(){
+    int n;
+    cin>>n;
+    int a[100];
+    for(int i=1;i<=n;i++){
+        cin>>a[i];
+        if(a[i]<1||a[i]>n){
+            a[i]=0;
+        }
+    }
+    for(int i=1;i<=n;i++){
+        while(a[i]!=0 && a[i]!=i && a[i]!=a[a[i]]) {
+            swap(a[i],a[a[i]]);
+        }
+    }
+    for(int i=1;i<=n;i++){
+        if(a[i]!=i){
+            cout<<i<<endl;
+            return 0;
+        }
+    }
+
+    return 0;
+}
+```
