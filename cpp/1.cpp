@@ -1,30 +1,18 @@
-#include<iostream>
-#include<unordered_map>
-#include<vector>
+#include<bits/stdc++.h>
 using namespace std;
-vector<int> twosum(vector<int> & nums, int target){
-    unordered_map<int,int> hash;
-    for(int i=0;i<nums.size();i++){
-        int com=target-nums[i];
-        if(hash.find(com)!=hash.end()){
-            return {hash[com],i};
+
+int main(){  
+    int n; cin>>n;
+    vector<int> a(n+1);
+    for(int i=0;i<n;i++) cin>>a[i];
+    int tar; cin>>tar;
+    unordered_map<int,int>hash;
+    for(int i=0;i<n;i++){
+        int x=tar-a[i];
+        if(hash.find(x)!=hash.end()){
+            cout<<a[hash[x]]<<'+'<<a[i]<<'='<<tar<<endl;
         }
-        hash[nums[i]]=i;
+        hash[a[i]]=i;
     }
-    return {};
-}
-int main(){
-    vector<int> nums;
-    int x;
-    while(cin>>x){
-        nums.push_back(x);
-        if(cin.peek()=='\n'){
-            break;
-        }
-    }
-    int target;
-    cin>>target;
-    vector<int> ans=twosum(nums,target);
-    cout<<'['<<ans[0]<<','<<ans[1]<<']'<<endl;
-    return 0;
+    return 0;  
 }

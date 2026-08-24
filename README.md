@@ -1,6 +1,10 @@
 # leetcode Hot 100
 - [leetcode Hot 100](#leetcode-hot-100)
 - [1.两数之和【哈希表】](#1两数之和哈希表)
+- [2.两数相加【链表】](#2两数相加链表)
+- [20.有效的括号【栈】](#20有效的括号栈)
+- [21.合并两个有序链表【链表，递归】](#21合并两个有序链表链表递归)
+- [70. 爬楼梯【DP / 记忆化递归】](#70-爬楼梯dp--记忆化递归)
 - [141.环形链表【快慢指针】](#141环形链表快慢指针)
 - [160.相交链表【双指针法】](#160相交链表双指针法)
 - [206.反转链表【经典三指针】](#206反转链表经典三指针)
@@ -45,7 +49,11 @@
 
 输入：nums = [3,2,4], target = 6
 输出：[1,2]
-**ans:**
+
+**hash[key] = value; 做了两件事**
+- 如果这个key已经存在哈希表里：直接覆盖它对应的 value。
+- 如果这个key根本不存在：自动帮你插入一对键值对 (key, value)，底层自动分配内存，扩大哈希表桶的数量。
+所以你不需要预先定义哈希表的长度、容量，它会动态增长。不像数组 /vector 要考虑空间。
 ```cpp
 class Solution {
 public:
@@ -61,6 +69,229 @@ public:
             hash[nums[i]]=i;
         }
         return {};
+    }
+};
+```
+# 2.两数相加【链表】
+给你两个 非空 的链表，表示两个非负的整数。它们每位数字都是按照 逆序 的方式存储的，并且每个节点只能存储 一位 数字。
+
+请你将两个数相加，并以相同形式返回一个表示和的链表。
+```cpp
+#include<bits/stdc++.h>
+using namespace std;
+
+struct ListNode {
+    int val;
+    ListNode *next;
+    ListNode() : val(0), next(nullptr) {}
+    ListNode(int x) : val(x), next(nullptr) {}
+    ListNode(int x, ListNode *next) : val(x), next(next) {}
+};
+
+ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
+    ListNode* dummy = new ListNode(0); // 虚拟头结点
+    ListNode* cur = dummy;
+    int carry = 0; // 进位
+
+    while(l1 != nullptr || l2 != nullptr || carry != 0){
+        int sum = carry;
+        if(l1) sum += l1->val;
+        if(l2) sum += l2->val;
+
+        carry = sum / 10;
+        cur->next = new ListNode(sum % 10);
+        cur = cur->next;
+
+        if(l1) l1 = l1->next;
+        if(l2) l2 = l2->next;
+    }
+    return dummy->next;
+}
+
+// 根据vector构建链表
+ListNode* buildList(const vector<int>& nums){
+    ListNode* dummy = new ListNode(0);
+    ListNode* cur = dummy;
+    for(int x : nums){
+        cur->next = new ListNode(x);
+        cur = cur->next;
+    }
+    return dummy->next;
+}
+
+// 打印链表
+void printList(ListNode* head){
+    ListNode* p = head;
+    while(p != nullptr){
+        cout << p->val;
+        if(p->next) cout << " -> ";
+        p = p->next;
+    }
+    cout << endl;
+}
+
+int main(){
+    vector<int> a,b;
+    int x;
+
+    while(cin >> x){
+        if(x == -1) break;
+        a.push_back(x);
+    }
+
+    while(cin >> x){
+        if(x == -1) break;
+        b.push_back(x);
+    }
+
+    ListNode* l1 = buildList(a);
+    ListNode* l2 = buildList(b);
+
+    ListNode* ans = addTwoNumbers(l1,l2);
+    printList(ans);
+
+    return 0;
+}
+```
+# 20.有效的括号【栈】
+| 方法               | 返回类型                 | 用途                                                 |
+|--------------------|--------------------------|------------------------------------------------------|
+| `mp.count(key)`    | 整数（0 或 1）  | 仅判断 key 是否存在，代码简短                        |
+| `mp.find(key)`     | 迭代器 `iterator`        | 判断存在，并且可以读取 `it->first`、`it->second`     |
+
+```cpp
+class Solution {
+public:
+    bool isValid(string s) {
+        // 哈希表：key为右括号，value为其对应的左括号
+        unordered_map <char,char> ls={
+            {'}','{'},{')','('},{']','['}
+        };
+        // 保存遍历遇到的左括号
+        stack <char> stk;
+
+        for(char c:s){
+            // ls.count(c)为true，说明当前字符是右括号（是map的key）
+            if(ls.count(c)){
+                // 两种不合法情况：
+                // 1.栈为空：来了右括号，前面没有可供匹配的左括号
+                // 2.栈顶左括号 和 当前右括号应该配对的左括号不一致，类型不匹配
+                if(stk.empty()||stk.top()!=ls[c]){
+                    return false;
+                }
+                // 匹配成功，弹出栈顶
+                stk.pop();
+            }else{
+                // 当前字符是左括号，压入栈中，等待后续右括号来匹配
+                stk.push(c);
+            }
+        }
+        // 遍历结束，栈必须为空
+        // 如果栈内还有元素，代表存在没有被闭合的左括号，返回false
+        return stk.empty();
+    }
+};
+```
+# 21.合并两个有序链表【链表，递归】
+重点区分两件事：
+定义ListNode结构体内部，不能写 ListNode next;（直接的成员对象），会报错。
+但是可以写 ListNode *next;（**指针**），完全合法。ListNode *next，代表：指向 ListNode 类型对象的指针。
+- 写法 1：**初始化列表**
+```
+ListNode(int x) : val(x), next(nullptr) {}
+```
+- 写法 2：函数体内赋值
+```
+ListNode(int x) {
+    val = x;
+    next = nullptr;
+}
+```
+**初始化列表：分配完对象内存，进入函数体之前完成成员初始化。(常用)**
+函数体内赋值：对象先产生，成员得到随机垃圾值；进入函数体后再赋值覆盖。
+普通 int、指针，两种写法效果等价。
+```cpp
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
+        if(list1==nullptr) return list2;
+        if(list2==nullptr) return list1;
+        if(list1->val>list2->val) {
+            list2->next=mergeTwoLists(list1,list2->next);
+            return list2;}
+        else{
+            list1->next=mergeTwoLists(list1->next,list2);
+            return list1;
+            }
+    }
+};
+/*
+ListNode* mergeIterative(ListNode* list1, ListNode* list2) {
+    ListNode dummy(0);
+    ListNode* cur = &dummy;
+
+    while (list1 != nullptr && list2 != nullptr) {
+        if (list1->val <= list2->val) {
+            cur->next = list1;
+            list1 = list1->next;
+        } else {
+            cur->next = list2;
+            list2 = list2->next;
+        }
+        cur = cur->next;
+    }
+    
+    if (list1 != nullptr) cur->next = list1;
+    if (list2 != nullptr) cur->next = list2;
+
+    return dummy.next;
+}
+*/
+```
+# 70. 爬楼梯【DP / 记忆化递归】
+![](./img/70.png)
+记忆化搜索属于动态规划，是 DP 的「自顶向下」实现方式
+平时最常见的 for‑循环迭代写法叫 DP「自底向上」。
+
+$f(n)=f(n-1)+f(n-2)$
+```cpp
+class Solution {
+public:
+    int climbStairs(int n) {
+        if(n <= 2) return n;
+        vector<int> dp(n + 1, 0);
+        dp[1] = 1;
+        dp[2] = 2;
+        for(int i = 3; i <= n; i++){
+            dp[i] = dp[i - 1] + dp[i - 2];
+        }
+        return dp[n];
+    }
+};
+```
+```cpp
+class Solution {
+public:
+    int climbStairs(int n) {
+        vector <int> memo(n+1,0);
+       return dfs(n,memo);
+    }
+    int dfs(int n,vector <int> &memo){
+        if(n==1) return 1;
+        if(n==2) return 2;
+        if(memo[n]!=0) return memo[n];// 查备忘录，已经算过，直接返回
+        memo[n]=dfs(n-1,memo)+dfs(n-2,memo);//没算过，计算并存进去
+        return memo[n];
     }
 };
 ```
